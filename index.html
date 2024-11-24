@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>喀輪巴斯貓本紙條計算工具</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --window-width: min(350px, 95vw);
+            --input-height: clamp(26px, 4vh, 35px);
+            --font-size-base: clamp(14px, 2.5vw, 16px);
+            --padding-base: clamp(8px, 2vw, 12px);
+        }
+
+        body {
+            margin: 0;
+            padding: clamp(10px, 3vh, 20px);
+            background-color: #1a1a1a;
+            font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .game-window {
+            width: var(--window-width);
+            background-color: rgba(14, 42, 63, 0.95);
+            border: 1px solid #436279;
+            border-radius: 3px;
+            padding: var(--padding-base);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .window-header {
+            background-color: #1c4565;
+            padding: calc(var(--padding-base) * 0.7) var(--padding-base);
+            border: 1px solid #436279;
+            border-radius: 3px;
+            margin-bottom: var(--padding-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .window-header span {
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 3px #4a9eff, 
+                         0 0 5px #4a9eff,
+                         0 1px 1px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+            font-size: calc(var(--font-size-base) * 1.2);
+        }
+
+        .input-group {
+            margin-bottom: calc(var(--padding-base) * 0.8);
+            background-color: rgba(20, 55, 82, 0.8);
+            border: 1px solid #436279;
+            border-radius: 3px;
+            padding: calc(var(--padding-base) * 0.8);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: calc(var(--padding-base) * 0.5);
+        }
+
+        @media (max-width: 340px) {
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        label {
+            color: #8aabcb;
+            font-size: var(--font-size-base);
+            font-weight: 700;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+            min-width: 85px;
+            flex-shrink: 0;
+        }
+
+        input, select {
+            height: var(--input-height);
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid #436279;
+            color: #fff;
+            padding: 2px 8px;
+            font-size: var(--font-size-base);
+            border-radius: 3px;
+            font-weight: 700;
+            text-shadow: 0 0 4px #4a9eff;
+            flex: 1;
+        }
+
+        input {
+            width: clamp(60px, 20vw, 80px);
+            min-width: 60px;
+        }
+
+        select {
+            width: clamp(120px, calc(100% - 100px), 160px);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #6a8ca8;
+            background-color: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 5px #4a9eff;
+        }
+
+        /* 修正 iOS 上的 select 樣式 */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, #436279 50%), 
+                            linear-gradient(135deg, #436279 50%, transparent 50%);
+            background-position: calc(100% - 16px) calc(50% + 2px), 
+                               calc(100% - 12px) calc(50% + 2px);
+            background-size: 4px 4px, 4px 4px;
+            background-repeat: no-repeat;
+            padding-right: 24px;
+        }
+
+        button {
+            width: 100%;
+            height: calc(var(--input-height) * 1.4);
+            background: linear-gradient(to bottom, #1c4565, #0e2a3f);
+            border: 1px solid #436279;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: calc(var(--font-size-base) * 1.1);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            margin-top: var(--padding-base);
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (hover: hover) {
+            button:hover {
+                background: linear-gradient(to bottom, #2a5a80, #1c4565);
+                border-color: #6a8ca8;
+                text-shadow: 0 0 4px #4a9eff;
+            }
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 0 2px rgba(0,0,0,0.3);
+        }
+
+        .result {
+            background-color: rgba(20, 55, 82, 0.8);
+            border: 1px solid #436279;
+            border-radius: 3px;
+            padding: calc(var(--padding-base) * 1.2);
+            text-align: center;
+            font-size: calc(var(--font-size-base) * 1.4);
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 4px #4a9eff,
+                        0 0 6px #4a9eff,
+                        0 1px 2px rgba(0,0,0,0.8);
+            animation: glow 2s infinite;
+            margin-top: var(--padding-base);
+            min-height: calc(var(--input-height) * 1.2);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            word-break: break-all;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 觸控設備的懸浮效果處理 */
+        @media (hover: hover) {
+            .result:hover {
+                background-color: rgba(28, 69, 101, 0.8);
+            }
+
+            .result:hover::after {
+                opacity: 1;
+            }
+        }
+
+        .result::after {
+            content: "點擊複製";
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(14, 42, 63, 0.95);
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: calc(var(--font-size-base) * 0.85);
+            color: #8aabcb;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            border: 1px solid #436279;
+            white-space: nowrap;
+        }
+
+        .result.copied::after {
+            content: "已複製！";
+            background-color: rgba(40, 167, 69, 0.95);
+            color: white;
+            opacity: 1;
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 4px #4a9eff, 0 0 6px #4a9eff; }
+            50% { text-shadow: 0 0 8px #4a9eff, 0 0 12px #4a9eff; }
+            100% { text-shadow: 0 0 4px #4a9eff, 0 0 6px #4a9eff; }
+        }
+
+        /* iOS Safari 特定修正 */
+        @supports (-webkit-touch-callout: none) {
+            input {
+                font-size: 16px; /* 防止 iOS 自動縮放 */
+            }
+            
+            select {
+                font-size: 16px;
+                background-color: rgba(0, 0, 0, 0.5) !important; /* 覆蓋 iOS 預設背景 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-window">
+        <div class="window-header">
+            <span>喀輪巴斯貓本紙條計算工具</span>
+        </div>
+        
+        <div class="input-group">
+            <label for="num1">1) 數字 1：</label>
+            <input type="number" inputmode="numeric" pattern="[0-9]*" id="num1" required placeholder="輸入數字">
+        </div>
+        
+        <div class="input-group">
+            <label for="num2">2) 數字 2：</label>
+            <input type="number" inputmode="numeric" pattern="[0-9]*" id="num2" required placeholder="輸入數字">
+        </div>
+        
+        <div class="input-group">
+            <label for="num3">3) 數字 3：</label>
+            <input type="number" inputmode="numeric" pattern="[0-9]*" id="num3" required placeholder="輸入數字">
+        </div>
+        
+        <div class="input-group">
+            <label for="operation">選擇運算式：</label>
+            <select id="operation">
+                <option value="1+2+3">1 + 2 + 3</option>
+                <option value="1+2-3">1 + 2 - 3</option>
+                <option value="1+2X3">1 + 2 X 3</option>
+                <option value="1-2+3">1 - 2 + 3</option>
+                <option value="1-2-3">1 - 2 - 3</option>
+                <option value="1-2X3">1 - 2 X 3</option>
+                <option value="1X2+3">1 X 2 + 3</option>
+                <option value="1X2-3">1 X 2 - 3</option>
+                <option value="1X2X3">1 X 2 X 3</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label for="final">選擇文字：</label>
+            <select id="final">
+                <option value="山夏">山夏</option>
+                <option value="立春">立春</option>
+                <option value="入夏">入夏</option>
+                <option value="秋收">秋收</option>
+                <option value="巴斯">巴斯</option>
+            </select>
+        </div>
+        
+        <button onclick="calculate()">計算結果</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const resultDiv = document.getElementById('result');
+        
+        // 處理點擊複製
+        resultDiv.addEventListener('click', async function() {
+            const text = this.textContent;
+            if (!text || text === '請填寫所有數字') return;
+
+            try {
+                await navigator.clipboard.writeText(text);
+                this.classList.add('copied');
+                
+                setTimeout(() => {
+                    this.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error('複製失敗：', err);
+                // 備用複製方法
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    this.classList.add('copied');
+                    setTimeout(() => {
+                        this.classList.remove('copied');
+                    }, 2000);
+                } catch (err) {
+                    console.error('備用複製也失敗：', err);
+                }
+                document.body.removeChild(textArea);
+            }
+        });
+
+        // 計算功能
+        function calculate() {
+            const num1Input = document.getElementById('num1');
+            const num2Input = document.getElementById('num2');
+            const num3Input = document.getElementById('num3');
+            
+            if (!num1Input.value || !num2Input.value || !num3Input.value) {
+                document.getElementById('result').textContent = '請填寫所有數字';
+                return;
+            }
+
+            const num1 = parseInt(num1Input.value);
+            const num2 = parseInt(num2Input.value);
+            const num3 = parseInt(num3Input.value);
+            const operation = document.getElementById('operation').value;
+            const finalWord = document.getElementById('final').value;
+
+            let result = 0;
+            switch (operation) {
+                case '1+2+3':
+                    result = num1 + num2 + num3;
+                    break;
+                case '1+2-3':
+                    result = num1 + num2 - num3;
+                    break;
+                case '1+2X3':
+                    result = num1 + (num2 * num3);
+                    break;
+                case '1-2+3':
+                    result = num1 - num2 + num3;
+                    break;
+                case '1-2-3':
+                    result = num1 - num2 - num3;
+                    break;
+                case '1-2X3':
+                    result = num1 - (num2 * num3);
+                    break;
+                case '1X2+3':
+                    result = (num1 * num2) + num3;
+                    break;
+                case '1X2-3':
+                    result = (num1 * num2) - num3;
+					break;
+                case '1X2X3':
+                    result = num1 * num2 * num3;
+                    break;
+                default:
+                    result = "無效的運算式";
+                    break;
+            }
+
+            const finalResult = result + finalWord;
+            document.getElementById('result').textContent = finalResult;
+            document.getElementById('result').classList.remove('copied');
+        }
+
+        // 添加輸入事件處理
+        document.querySelectorAll('input').forEach(input => {
+            // Enter 鍵觸發計算
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    calculate();
+                }
+            });
+
+            // 限制只能輸入數字
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            // 移動設備優化：完成輸入時自動關閉鍵盤
+            input.addEventListener('blur', function() {
+                window.scrollTo(0, 0);
+            });
+        });
+
+        // 防止移動設備縮放
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // 初始化頁面
+        window.onload = function() {
+            // 重置所有輸入
+            document.querySelectorAll('input').forEach(input => {
+                input.value = '';
+            });
+            // 清空結果
+            document.getElementById('result').textContent = '';
+        };
+    </script>
+</body>
+</html>
