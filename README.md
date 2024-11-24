@@ -2,6 +2,8 @@
 
 一個專門為瑪奇(Mabinogi)遊戲設計的紙條計算輔助工具。這個工具可以幫助玩家快速計算喀輪巴斯貓本中的紙條答案，提高通關效率。
 
+https://hinake27.github.io/mabinogi-tw-Scratchpaper/
+
 ## 功能特點
 
 - 🧮 支援九種不同運算方式
